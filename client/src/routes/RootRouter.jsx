@@ -18,17 +18,14 @@ import AdminDashboardPage from '../pages/Admin/AdminDashboardPage';
 import ProtectedRoute from './ProtectedRoute';
 import AppLayout from '../layouts/AppLayout';
 import ErrorPage from '../pages/ErrorPage';
+import ChangePassword from '../components/common/ChangePassword';
 
 const router = createBrowserRouter([
   // Public routes
   {
     path: '/',
-    element: <HomePage />,
+    element: <LoginPage />,
     errorElement: <ErrorPage />
-  },
-  {
-    path: '/login',
-    element: <LoginPage />
   },
   {
     path: '/register',
@@ -60,7 +57,8 @@ const router = createBrowserRouter([
             <AdminDashboardPage />
           </ProtectedRoute>
         )
-      }
+      },
+      {path: '/change-password', element: <ChangePassword/> }
     ]
   }
 ]);
