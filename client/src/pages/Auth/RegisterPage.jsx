@@ -23,10 +23,7 @@ export default function RegisterPage() {
   async function handleRegister() {
     try {
       const data = await register(email, password, name, role);
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.user.role);
       enqueueSnackbar("Registered successfully 🎉", { variant: "success" });
-      window.location.href = "/dashboard";
     } catch {
       enqueueSnackbar("Registration failed. Please try again.", {
         variant: "error",
@@ -35,99 +32,83 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="bg-[#043049] flex flex-col lg:flex-row items-center justify-center w-full">
-      {/* Left Image Section */}
-      <div className="flex justify-center items-center w-full lg:w-1/2 mb-8 lg:mb-0">
-        <img
-          src="/src/assets/vaco.png"
-          alt="logo"
-          className="object-contain w-[50%] sm:w-[60%] md:w-[70%] lg:w-[550px] xl:w-[461px] h-auto"
-        />
-      </div>
+    <div className="w-full max-w-md bg-white/30 backdrop-blur-lg p-8 rounded-2xl shadow-lg">
+      <h1> Register New User</h1>
+      <form
+        className="space-y-4 mt-4 md:mt-6"
+        onSubmit={(e) => e.preventDefault()}
+      >
+        <label className="block">
+          <span className="text-sm font-medium text-black">Username</span>
+          <input
+            type="name"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter Username"
+            className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          />
+        </label>
 
-      {/* Right Form Section */}
-      <div className="w-full max-w-md bg-white/30 backdrop-blur-lg p-8 rounded-2xl shadow-lg">
-        <h1 className="text-2xl md:text-3xl font-semibold text-black mb-2">
-          Register
-        </h1>
-        <p className="text-sm md:text-lg text-black mb-6">
-          Welcome to SkillSphere — Sign Up to continue.
-        </p>
+        <label className="block">
+          <span className="text-sm font-medium text-black">Email</span>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter you email"
+            className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          />
+        </label>
 
-        <form
-          className="space-y-4 mt-4 md:mt-6"
-          onSubmit={(e) => e.preventDefault()}
-        >
-          <label className="block">
-            <span className="text-sm font-medium text-black">Username</span>
-            <input
-              type="name"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-              placeholder="Enter Username"
-            />
-          </label>
-
-          <label className="block">
-            <span className="text-sm font-medium text-black">Role</span>
-            <select 
-              onChange={(e) => setRole(e.target.value)}
-              className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-              value={role}
-            >
-              <option value="" disabled>-- Select Role --</option>
-              <option value="USER">USER</option>
-              <option value="LEAD">TEAM LEAD</option>
-              <option value="ADMIN">ADMIN</option>
-            </select>
-          </label>
-
-          <label className="block">
-            <span className="text-sm font-medium text-black">Email</span>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-              placeholder="you@example.com"
-            />
-          </label>
-
-          <label className="block mt-6">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-black">Password</span>
-            </div>
-            <div className="relative">
-              <input
-                type={show ? "text" : "password"}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                placeholder="Enter your password"
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-2 text-gray-400"
-                onClick={() => setShow(!show)}
-              >
-                {show ? <EyeOff /> : <Eye />}
-              </button>
-            </div>
-          </label>
-
-          <button
-            type="submit"
-            onClick={handleRegister}
-            className="w-full py-2 px-4 rounded-xl text-black font-medium transition bg-indigo-300 hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+        <label className="block">
+          <span className="text-sm font-medium text-black">Role</span>
+          <select
+            onChange={(e) => setRole(e.target.value)}
+            className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            value={role}
           >
-            Sign In
-          </button>
-        </form>
-      </div>
+            <option value="" disabled>
+              -- Select Role --
+            </option>
+            <option value="USER">USER</option>
+            <option value="LEAD">TEAM LEAD</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </label>
+
+        <label className="block mt-6">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium text-black">Password</span>
+          </div>
+          <div className="relative">
+            <input
+              type={show ? "text" : "password"}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-2 text-gray-400"
+              onClick={() => setShow(!show)}
+            >
+              {show ? <EyeOff /> : <Eye />}
+            </button>
+          </div>
+        </label>
+
+        <button
+          type="submit"
+          onClick={handleRegister}
+          className="w-full py-2 px-4 rounded-xl text-black font-medium transition bg-indigo-300 hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+        >
+          Register
+        </button>
+      </form>
     </div>
   );
 }
