@@ -1,123 +1,114 @@
-import React, { useState } from 'react';
-import {
-  TextField,
-  Button,
-  Paper,
-  Typography,
-  InputAdornment
-} from '@mui/material';
-import { Person, Email, Lock } from '@mui/icons-material';
-import { useSnackbar } from 'notistack';
-import { register } from '../../api/auth.api';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+// import {
+//   TextField,
+//   Button,
+//   Paper,
+//   Typography,
+//   InputAdornment
+// } from '@mui/material';
+// import { Person, Email, Lock } from '@mui/icons-material';
+import { useSnackbar } from "notistack";
+import { register } from "../../api/auth.api";
+// import { motion } from 'framer-motion';
+import { Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
+  const [name, setName] = useState("");
   const { enqueueSnackbar } = useSnackbar();
+  const [role, setRole] = useState("");
 
   async function handleRegister() {
     try {
-      const data = await register(email, password, name);
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('role', data.user.role);
-      enqueueSnackbar('Registered successfully 🎉', { variant: 'success' });
-      window.location.href = '/';
+      const data = await register(email, password, name, role);
+      enqueueSnackbar("Registered successfully 🎉", { variant: "success" });
     } catch {
-      enqueueSnackbar('Registration failed. Please try again.', { variant: 'error' });
+      enqueueSnackbar("Registration failed. Please try again.", {
+        variant: "error",
+      });
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-white to-purple-100 flex items-center justify-center relative overflow-hidden px-4">
-      {/* Floating visuals */}
-      <div className="absolute top-0 left-0 w-32 h-32 bg-pink-200 rounded-full opacity-30 animate-pulse blur-xl" />
-      <div className="absolute bottom-0 right-0 w-40 h-40 bg-purple-200 rounded-full opacity-30 animate-pulse blur-xl" />
-
-      {/* Register Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-half max-w-md"
+    <div className="w-full max-w-md bg-white/30 backdrop-blur-lg p-8 rounded-2xl shadow-lg">
+      <h1> Register New User</h1>
+      <form
+        className="space-y-4 mt-4 md:mt-6"
+        onSubmit={(e) => e.preventDefault()}
       >
-        <Paper elevation={5} className="p-8 rounded-xl shadow-xl space-y-6">
-          <Typography variant="h4" className="text-purple-700 font-bold text-center">
-            Create Your Account ✨
-          </Typography>
-
-          <Typography variant="body2" className="text-center text-gray-600">
-            Join SkillSphere and start celebrating your learning journey
-          </Typography>
-
-          <TextField
-            label="Name"
-            fullWidth
-            variant="outlined"
+        <label className="block">
+          <span className="text-sm font-medium text-black">Username</span>
+          <input
+            type="name"
+            required
             value={name}
-            onChange={e => setName(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Person color="action" />
-                </InputAdornment>
-              )
-            }}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter Username"
+            className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
           />
+        </label>
 
-          <TextField
-            label="Email"
-            fullWidth
-            variant="outlined"
+        <label className="block">
+          <span className="text-sm font-medium text-black">Email</span>
+          <input
+            type="email"
+            required
             value={email}
-            onChange={e => setEmail(e.target.value)}
-            sx={{ mt: 2 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Email color="action" />
-                </InputAdornment>
-              )
-            }}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter you email"
+            className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
           />
+        </label>
 
-          <TextField
-            label="Password"
-            type="password"
-            fullWidth
-            variant="outlined"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            sx={{ mt: 2 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Lock color="action" />
-                </InputAdornment>
-              )
-            }}
-          />
-
-          <Button
-            variant="contained"
-            fullWidth
-            size="large"
-            sx={{ mt: 2 }}
-            onClick={handleRegister}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+        <label className="block">
+          <span className="text-sm font-medium text-black">Role</span>
+          <select
+            onChange={(e) => setRole(e.target.value)}
+            className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            value={role}
           >
-            Register
-          </Button>
+            <option value="" disabled>
+              -- Select Role --
+            </option>
+            <option value="USER">USER</option>
+            <option value="LEAD">TEAM LEAD</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </label>
 
-          <Typography variant="body2" className="text-center text-gray-600">
-            Already have an account?{' '}
-            <a href="/login" className="text-purple-600 hover:underline font-medium">
-              Login
-            </a>
-          </Typography>
-        </Paper>
-      </motion.div>
+        <label className="block mt-6">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium text-black">Password</span>
+          </div>
+          <div className="relative">
+            <input
+              type={show ? "text" : "password"}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-2 text-gray-400"
+              onClick={() => setShow(!show)}
+            >
+              {show ? <EyeOff /> : <Eye />}
+            </button>
+          </div>
+        </label>
+
+        <button
+          type="submit"
+          onClick={handleRegister}
+          className="w-full py-2 px-4 rounded-xl text-black font-medium transition bg-indigo-300 hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+        >
+          Register
+        </button>
+      </form>
     </div>
   );
 }

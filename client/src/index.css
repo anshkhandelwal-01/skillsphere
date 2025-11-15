@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root { --bg: #F7FAFC; }
-body { background: var(--bg); margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; }
+/* :root { --bg: #F7FAFC; }
+body { background: var(--bg); margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; } */
