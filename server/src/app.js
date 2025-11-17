@@ -24,5 +24,6 @@ app.use('/badges', badgesRoutes);
 app.get('/', (_, res) => res.send('SkillSphere API running'));
 
 connectDB().then(() => {
-  app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+  app.listen(PORT,  "0.0.0.0", () => console.log(`Server running on ${PORT}`));
+
 });
