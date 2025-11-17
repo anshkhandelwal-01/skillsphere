@@ -16,7 +16,7 @@ export default function CatalogPage() {
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState("");
   const [format, setFormat] = useState("");
-  const [show, setShow] = useState(false);
+  const [openId, setOpenId] = useState(null);
 
   useEffect(() => {
     getCourses().then(setCourses);
@@ -28,6 +28,9 @@ export default function CatalogPage() {
       (level ? c.level === level : true) &&
       (format ? c.format === format : true)
   );
+  const handleToggle = (i) => {
+    setOpenId(prev => (prev === i ? null : i));
+  };
 
   return (
     <div className="p-6 space-y-4">
@@ -65,24 +68,24 @@ export default function CatalogPage() {
       </div>
 
       <Grid container spacing={3}>
-        {filtered.map((c) => (
+        {filtered.map((c, index) => (
           <Grid item xs={12} md={4} key={c._id}>
             <Paper className="p-4 space-y-3 relative">
               {/* Ellipsis button at top right */}
               <div className="relative">
                 {/* Ellipsis Button */}
                 <button
-                  onClick={() => setShow(!show)}
+                  onClick={() => handleToggle(index)}
                   className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-100"
                 >
                   <EllipsisVertical size={20} />
                 </button>
 
                 {/* Dropdown */}
-                {show && (
-                  <div className="absolute top-6 left-70 w-32 bg-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                {openId === index && (
+                  <div className="relative top-6 left-70 w-32 bg-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
                     <button className="w-full text-left px-4 py-2 hover:bg-gray-100">
-                      Edit
+                      Add Module
                     </button>
                     <button className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600">
                       Delete

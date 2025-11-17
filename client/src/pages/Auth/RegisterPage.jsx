@@ -23,10 +23,14 @@ export default function RegisterPage() {
   async function handleRegister() {
     try {
       const data = await register(email, password, name, role);
-      enqueueSnackbar("Registered successfully 🎉", { variant: "success" });
+      setEmail("");
+      setName("");
+      setRole("");
+      enqueueSnackbar("Registered successfully 🎉", { variant: "success", autoHideDuration:3000 });
     } catch {
       enqueueSnackbar("Registration failed. Please try again.", {
         variant: "error",
+        autoHideDuration:3000,
       });
     }
   }
