@@ -15,7 +15,7 @@ import { Eye, EyeOff } from "lucide-react";
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(true);
   const [name, setName] = useState("");
   const { enqueueSnackbar } = useSnackbar();
   const [role, setRole] = useState("");
@@ -86,7 +86,7 @@ export default function RegisterPage() {
             <input
               type={show ? "text" : "password"}
               required
-              value={password}
+              value={password || "vbsllp"}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
               placeholder="Enter your password"
