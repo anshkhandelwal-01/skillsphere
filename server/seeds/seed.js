@@ -96,7 +96,7 @@ async function run() {
     courseId: course._id,
     title: 'Introduction to ETL',
     order: 1,
-    materials: [{ type: 'Video', title: 'ETL Overview', url: 'https://example.com/video' }],
+    materials: [{ type: 'Video', title: 'ETL Overview', url: 'https://example.com/video1' }, { type: 'Video', title: 'Extraction in ETL', url: 'https://example.com/video2' }],
     quizId: quiz._id,
     assessmentId: assess._id,
     assignmentId: assignment._id

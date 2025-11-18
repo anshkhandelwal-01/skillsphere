@@ -11,7 +11,6 @@ export default function Topbar() {
 
   const role = localStorage.getItem("role");
   const [createshow, setCreateShow] = useState(false);
-  const [deleteshow, setDeleteShow] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -47,22 +46,6 @@ export default function Topbar() {
     } catch (error) {
       console.error("Error creating course:", error);
       enqueueSnackbar("Failed to create new Course. Please try again.", {
-        variant: "error",
-      });
-    }
-  };
-
-  const handleDeleteCourse = async () => {
-    try {
-      const courseDelete = await deleteCourse(title);
-      navigate("/catalog", { replace: true });
-      enqueueSnackbar("Course deleted successfully!", {
-        variant: "success",
-      });
-      setDeleteShow(false);
-    } catch (error) {
-      console.error("Error creating course:", error);
-      enqueueSnackbar("Course not found. Please try again.", {
         variant: "error",
       });
     }
@@ -250,41 +233,6 @@ export default function Topbar() {
                 className="ml-68 mt-4 py-2 px-4 rounded-xl text-black font-medium transition bg-slate-400 hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
               >
                 Add New Course
-              </button>
-            </div>
-          ) : null}
-          {role === "ADMIN" || role === "LEAD" ? (
-            <button
-              className="mr-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition duration-300"
-              onClick={() => setDeleteShow(!deleteshow)}
-            >
-              Delete Course
-            </button>
-          ) : null}
-          {deleteshow ? (
-            <div className="absolute top-16 right-16 w-96 p-6 bg-white border border-gray-300 rounded shadow-lg z-50">
-              <h2 className="text-lg font-semibold mb-4">Delete Course</h2>
-              {/* Form fields for course creation can be added here */}
-              <form onSubmit={(e) => e.preventDefault()}>
-                <label className="block">
-                  <span className="text-sm font-medium text-black">Title</span>
-                  <input
-                    type="title"
-                    required
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter Course Title"
-                    className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                  />
-                </label>
-              </form>
-
-              <button
-                type="submit"
-                onClick={handleDeleteCourse}
-                className="ml-28 mt-4 py-2 px-4 rounded-xl text-black font-medium transition bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-              >
-                Delete Course
               </button>
             </div>
           ) : null}

@@ -15,6 +15,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import AppLayout from "../layouts/AppLayout";
 import ErrorPage from "../pages/ErrorPage";
 import ChangePassword from "../components/common/ChangePassword";
+import { CourseModule } from "../pages/Modules/CourseModule";
 
 const router = createBrowserRouter([
   // Public routes
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
       { path: "/assessments", element: <AssessmentsPage /> },
       { path: "/profile", element: <ProfilePage /> },
       { path: "/resources", element: <ResourcesPage /> },
+      { path: "/modules/:courseId", element: <CourseModule /> },
       {
         path: "/admin",
         element: (

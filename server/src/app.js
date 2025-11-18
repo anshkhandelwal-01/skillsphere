@@ -9,6 +9,7 @@ const coursesRoutes = require('./routes/courses.routes');
 const assessmentsRoutes = require('./routes/assessments.routes');
 const adminRoutes = require('./routes/admin.routes');
 const badgesRoutes = require('./routes/badges.routes');
+const modulesRoutes = require('./routes/modules.routes');
 
 const app = express();
 app.use(cors());
@@ -20,6 +21,7 @@ app.use('/courses', coursesRoutes);
 app.use('/assessments', assessmentsRoutes);
 app.use('/admin', adminRoutes);
 app.use('/badges', badgesRoutes);
+app.use('/modules', modulesRoutes);
 
 app.get('/', (_, res) => res.send('SkillSphere API running'));
 
