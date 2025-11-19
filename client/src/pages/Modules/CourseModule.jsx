@@ -26,7 +26,7 @@ export const CourseModule = () => {
 
   return (
     <>
-      <h1 className="font-bold">There are {modules.length} in this course</h1>
+      <h1 className="font-bold">There are {modules.length} modules in this course</h1>
 
       {modules.map((module, index) => (
         <div

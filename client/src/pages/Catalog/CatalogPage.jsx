@@ -8,29 +8,50 @@ import {
   Chip,
   Button,
 } from "@mui/material";
-import { getCourses, deleteCourse } from "../../api/courses.api";
+import { getCourses, deleteCourse, createCourse } from "../../api/courses.api";
 import { EllipsisVertical, Trash2, Plus } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { addCourseModules } from "../../api/modules.api";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function CatalogPage() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+
   const [courses, setCourses] = useState([]);
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState("");
   const [format, setFormat] = useState("");
-  const [openId, setOpenId] = useState(null);
-  const [addMaterial, setAddMaterial] = useState(false);
+
+  const [openMenu, setOpenMenu] = useState(null);
+  const [showMaterialModal, setShowMaterialModal] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
+
   const [type, setType] = useState("");
-  const [title, setTitle] = useState("");
+  const [materialTitle, setMaterialTitle] = useState("");
   const [url, setUrl] = useState("");
+
   const role = localStorage.getItem("role");
 
+  const [showCreateCourse, setShowCreateCourse] = useState(false);
+  const [ctitle, setCTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [roleTarget, setRoleTarget] = useState("Developer");
+  const [clevel, setCLevel] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState("");
+  const [cformat, setCFormat] = useState("Video");
+  const [instructor, setInstructor] = useState("");
+  const [featured, setFeatured] = useState(false);
+  const [isLegacyProcess, setIsLegacyProcess] = useState(false);
+  const [weightage, setWeightage] = useState("");
+
+  // ===========================
+  // FIX: Prevent infinite loop
+  // ===========================
   useEffect(() => {
     getCourses().then(setCourses);
-  }, [courses]);
+  }, []);
 
   const filtered = courses.filter(
     (c) =>
@@ -39,72 +60,68 @@ export default function CatalogPage() {
       (format ? c.format === format : true)
   );
 
-  const handleToggle = (i) => {
-    setOpenId((prev) => (prev === i ? null : i));
+  const openMaterialModalFn = (courseId) => {
+    setSelectedCourseId(courseId);
+    setShowMaterialModal(true);
+    setOpenMenu(null); // close menu
   };
 
-  const handleDeleteCourse = async (title) => {
+  const handleAddMaterial = async () => {
     try {
-      const courseDelete = await deleteCourse(title);
-      enqueueSnackbar("Course deleted successfully!", {
-        variant: "success",
-        autoHideDuration: 3000,
-      });
-    } catch (error) {
-      console.error("Error creating course:", error);
-      enqueueSnackbar("Course not found. Please try again.", {
-        variant: "error",
-      });
+      await addCourseModules(selectedCourseId, type, materialTitle, url);
+
+      enqueueSnackbar("Material added!", { variant: "success" });
+      setShowMaterialModal(false);
+
+      setType("");
+      setMaterialTitle("");
+      setUrl("");
+
+      navigate(`/modules/${selectedCourseId}`);
+    } catch (err) {
+      enqueueSnackbar("Failed to add material", { variant: "error" });
     }
   };
 
-  const handleAddMaterial = async (courseId) => {
+  const handleCreateCourse = async () => {
     try {
-      const data = await addCourseModules(courseId, type, title, url);
-      enqueueSnackbar("Material added successfully!", {
-        variant: "success",
-        autoHideDuration: 3000,
-      });
-      setAddMaterial(false);
-      setType("");
-      setTitle("");
-      setUrl("");
-      navigate(`/modules/${courseId}`);
-    } catch (error) {
-      console.error("Error adding material:", error);
-      enqueueSnackbar("Failed to add material. Please try again.", {
-        variant: "error",
-      });
+      await createCourse(
+        ctitle,
+        description,
+        category,
+        roleTarget,
+        clevel,
+        durationMinutes,
+        cformat,
+        instructor,
+        featured,
+        isLegacyProcess,
+        weightage
+      );
+
+      enqueueSnackbar("Course created!", { variant: "success" });
+      setShowCreateCourse(false);
+    } catch {
+      enqueueSnackbar("Error creating course", { variant: "error" });
     }
   };
 
   return (
     <div className="flex flex-col p-6 space-y-4">
-      <Typography variant="h5">Course catalog</Typography>
+      <Typography variant="h5">Course Catalog</Typography>
+
+      {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <TextField
-          label="Search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <TextField
-          select
-          label="Level"
-          value={level}
-          onChange={(e) => setLevel(e.target.value)}
-        >
+        <TextField label="Search" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <TextField select label="Level" value={level} onChange={(e) => setLevel(e.target.value)}>
           {["", "Beginner", "Intermediate", "Advanced"].map((v) => (
             <MenuItem value={v} key={v}>
               {v || "Any"}
             </MenuItem>
           ))}
         </TextField>
-        <TextField
-          select
-          label="Format"
-          value={format}
-          onChange={(e) => setFormat(e.target.value)}
-        >
+
+        <TextField select label="Format" value={format} onChange={(e) => setFormat(e.target.value)}>
           {["", "Video", "Interactive", "Text"].map((v) => (
             <MenuItem value={v} key={v}>
               {v || "Any"}
@@ -117,140 +134,159 @@ export default function CatalogPage() {
         {filtered.map((c, index) => (
           <Grid item xs={12} md={4} key={c._id}>
             <Paper className="p-4 space-y-3 relative">
-              {/* Ellipsis button at top right */}
-              {role === "ADMIN" || role === "LEAD" ? (
-                <div className="relative">
-                  {/* Ellipsis Button */}
+
+              {/* Menu Button */}
+              {(role === "ADMIN" || role === "LEAD") && (
+                <div>
                   <button
-                    onClick={() => handleToggle(index)}
+                    onClick={() => setOpenMenu(openMenu === index ? null : index)}
                     className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-100"
                   >
-                    <EllipsisVertical size={20} />
+                    <EllipsisVertical />
                   </button>
 
-                  {/* Dropdown */}
-                  {openId === index && (
-                    <div className="absolute top-10 right-3 w-36 bg-white rounded-lg shadow-lg z-10 border border-gray-300">
+                  {openMenu === index && (
+                    <div className="absolute top-10 right-3 bg-white w-36 rounded shadow z-20">
                       <button
-                        onClick={() => {
-                          setAddMaterial(!addMaterial);
-                        }}
-                        className="w-full flex items-center gap-2 text-left px-4 py-2 hover:bg-gray-200"
+                        onClick={() => openMaterialModalFn(c._id)}
+                        className="w-full px-3 py-2 text-left hover:bg-gray-200 flex gap-2"
                       >
                         <Plus size={16} /> Add Module
                       </button>
-                      {addMaterial && (
-                        <div className="fixed inset-0 flex items-center justify-center bg-white/10 backdrop-blur-lg z-50">
-                          <div className="bg-white p-6 rounded-lg shadow-xl w-96">
-                            <h2 className="text-lg font-semibold mb-4 text-black">
-                              Add Material
-                            </h2>
-
-                            <form
-                              onSubmit={(e) => e.preventDefault()}
-                              className="space-y-3"
-                            >
-                              <label className="block">
-                                <span className="text-sm font-medium text-black">
-                                  Type
-                                </span>
-                                <input
-                                  required
-                                  value={type}
-                                  onChange={(e) => setType(e.target.value)}
-                                  placeholder="Video, Document, etc."
-                                  className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm"
-                                />
-                              </label>
-
-                              <label className="block">
-                                <span className="text-sm font-medium text-black">
-                                  Title
-                                </span>
-                                <input
-                                  required
-                                  value={title}
-                                  onChange={(e) => setTitle(e.target.value)}
-                                  placeholder="Enter Title"
-                                  className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm"
-                                />
-                              </label>
-
-                              <label className="block">
-                                <span className="text-sm font-medium text-black">
-                                  URL
-                                </span>
-                                <input
-                                  required
-                                  value={url}
-                                  onChange={(e) => setUrl(e.target.value)}
-                                  placeholder="Enter URL"
-                                  className="text-black mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm"
-                                />
-                              </label>
-
-                              <div className="flex justify-end gap-2 pt-3">
-                                <button
-                                  type="button"
-                                  onClick={() => setAddMaterial(false)}
-                                  className="px-4 py-2 bg-gray-300 rounded-md"
-                                >
-                                  Cancel
-                                </button>
-                                <button
-                                  onClick={()=>handleAddMaterial(c._id)}
-                                  type="submit"
-                                  className="px-4 py-2 bg-indigo-500 text-white rounded-md"
-                                >
-                                  Save
-                                </button>
-                              </div>
-                            </form>
-                          </div>
-                        </div>
-                      )}
 
                       <button
-                        onClick={() => {
-                          handleDeleteCourse(c.title);
-                        }}
-                        className="w-full flex items-center gap-2 text-left px-4 py-2 hover:bg-gray-200 text-red-600"
+                        onClick={() => deleteCourse(c.title)}
+                        className="w-full px-3 py-2 text-left hover:bg-gray-200 text-red-600 flex gap-2"
                       >
                         <Trash2 size={16} /> Delete
                       </button>
                     </div>
                   )}
                 </div>
-              ) : null}
+              )}
 
-              <Typography variant="subtitle1" className="font-semibold pr-8">
-                {c.title}
-              </Typography>
+              <Typography className="font-semibold">{c.title}</Typography>
+              <Typography color="gray">{c.description}</Typography>
 
-              <Typography variant="body2" color="text.secondary">
-                {c.description}
-              </Typography>
-
-              <div className="flex flex-wrap gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Chip label={c.category} />
                 <Chip label={c.level} />
-
-                {c.featured && <Chip color="secondary" label="Featured" />}
-                {c.isLegacyProcess && <Chip label="Legacy" />}
-                <Chip label={c.weightage} />
+                {c.featured && <Chip label="Featured" color="secondary" />}
               </div>
 
-              <Button
-                variant="contained"
-                className="mt-2"
-                href={`/modules/${c._id}`}
-              >
+              <Button variant="contained" href={`/modules/${c._id}`}>
                 View
               </Button>
             </Paper>
           </Grid>
         ))}
+
+        {/* Add Course Box */}
+        {(role === "ADMIN" || role === "LEAD") && (
+          <Paper
+            className="p-4 flex flex-col justify-center items-center cursor-pointer hover:bg-gray-100"
+            onClick={() => setShowCreateCourse(true)}
+          >
+            <Plus size={90} className="text-gray-400" />
+            <Typography>Add Course</Typography>
+          </Paper>
+        )}
       </Grid>
+
+      {/* ========================= */}
+      {/* Material Modal */}
+      {/* ========================= */}
+      {showMaterialModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96 shadow-xl">
+            <h2 className="text-lg font-semibold mb-4">Add Material</h2>
+
+            <div className="space-y-4">
+              <input
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                placeholder="e.g. Video, Document"
+                className="border p-2 w-full rounded text-black"
+              />
+
+              <input
+                value={materialTitle}
+                onChange={(e) => setMaterialTitle(e.target.value)}
+                placeholder="Material Title"
+                className="border p-2 w-full rounded text-black"
+              />
+
+              <input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="Material URL (.mp4 supported)"
+                className="border p-2 w-full rounded text-black"
+              />
+
+              <div className="flex justify-end gap-3">
+                <Button onClick={() => setShowMaterialModal(false)}>Cancel</Button>
+                <Button onClick={handleAddMaterial} variant="contained">
+                  Save
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================= */}
+      {/* Create Course Modal */}
+      {/* ========================= */}
+      {showCreateCourse && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-[700px] shadow-xl">
+            <h2 className="text-xl font-semibold mb-4">Create New Course</h2>
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Title" value={ctitle} onChange={(e) => setCTitle(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Category" value={category} onChange={(e) => setCategory(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Role Target" value={roleTarget} onChange={(e) => setRoleTarget(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Level" value={clevel} onChange={(e) => setCLevel(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Duration" value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Format" value={cformat} onChange={(e) => setCFormat(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Instructor" value={instructor} onChange={(e) => setInstructor(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Weightage" value={weightage} onChange={(e) => setWeightage(e.target.value)} />
+              </Grid>
+            </Grid>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <Button onClick={() => setShowCreateCourse(false)}>Cancel</Button>
+              <Button variant="contained" onClick={handleCreateCourse}>Create</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

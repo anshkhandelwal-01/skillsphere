@@ -4,7 +4,7 @@ import ProgressTracker from '../../components/common/ProgressTracker';
 import BadgeTimeline from '../../components/common/BadgeTimeline';
 
 export default function DashboardPage() {
-  const progressOverall = 42; // TODO: fetch via API
+  const progressOverall = 78; // TODO: fetch via API
   const modulesCompleted = 4;
   const totalModules = 10;
   const userId = 'me'; // replace with actual user id from /users/me
