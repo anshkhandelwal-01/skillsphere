@@ -53,44 +53,6 @@ async function run() {
     weightage: 1,
   });
 
-  const quiz = await Assessment.create({
-    title: "ETL Quiz",
-    courseId: course._id,
-    type: "Quiz",
-    maxAttempts: 5,
-    points: 50,
-    showFeedback: true,
-    dueDate: new Date(),
-    questions: [
-      {
-        prompt: "What does ETL stand for?",
-        type: "MCQ",
-        options: ["Extract Transform Load", "Enter Test Learn"],
-        correctIndex: 0,
-        weight: 1,
-      },
-    ],
-  });
-
-  const assess = await Assessment.create({
-    title: "ETL Assessment",
-    courseId: course._id,
-    type: "Assessment",
-    maxAttempts: 5,
-    points: 100,
-    showFeedback: false,
-    dueDate: new Date(),
-    questions: [
-      {
-        prompt: "Primary key usage?",
-        type: "TrueFalse",
-        options: ["True", "False"],
-        correctIndex: 0,
-        weight: 2,
-      },
-    ],
-  });
-
   const assignment = await Assessment.create({
     title: "ETL Final Assignment",
     courseId: course._id,
@@ -119,16 +81,12 @@ async function run() {
         type: "Video",
         title: "ETL Overview",
         url: "https://example.com/video1",
-        quizId: quiz._id,
-        assessmentId: assess._id,
         assignmentId: assignment._id,
       },
       {
         type: "Video",
         title: "Extraction in ETL",
         url: "https://example.com/video2",
-        quizId: quiz._id,
-        assessmentId: assess._id,
         assignmentId: assignment._id,
       },
     ],

@@ -4,8 +4,6 @@ const TrainingMaterialSchema = new Schema({
   type: { type: String, enum: ['Document', 'Video', 'PDF', 'Link'] },
   title: String,
   url: String,
-  quizId: { type: Types.ObjectId, ref: 'Assessment' },
-  assessmentId: { type: Types.ObjectId, ref: 'Assessment' },
   assignmentId: { type: Types.ObjectId, ref: 'Assessment' }
 });
 

@@ -18,8 +18,8 @@ router.get("/:courseId", requireAuth, async (req, res) => {
 
 router.put("/:courseId/add-material", requireAuth, requireRole("ADMIN", "LEAD"), async (req, res) => {
     const { courseId } = req.params;
-    const { type, title, url, quizId, assessmentId, assignmentId } = req.body;
-    const modules = [{ type, title, url, quizId, assessmentId, assignmentId }];
+    const { type, title, url, assignmentId } = req.body;
+    const modules = [{ type, title, url, assignmentId }];
     try {
       const existing = await Module.find({ courseId }).sort({ order: 1 });
       if (existing.length === 0) {
@@ -33,7 +33,8 @@ router.put("/:courseId/add-material", requireAuth, requireRole("ADMIN", "LEAD"),
           console.log(error);
           res.status(500).json({ message: "Server Error" });
         }
-      } else {
+      } 
+      else {
         try {
           const addMaterial = await Module.findByIdAndUpdate(
             {
@@ -51,7 +52,8 @@ router.put("/:courseId/add-material", requireAuth, requireRole("ADMIN", "LEAD"),
           res.status(500).json({ message: "Server Error" });
         }
       }
-    } catch (error) {
+    } 
+    catch (error) {
       res.status(500).json({ message: "Server Error" });
     }
   }

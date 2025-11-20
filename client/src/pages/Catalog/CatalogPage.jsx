@@ -30,9 +30,7 @@ export default function CatalogPage() {
   const [type, setType] = useState("");
   const [materialTitle, setMaterialTitle] = useState("");
   const [url, setUrl] = useState("");
-  const [quiz, setQuiZ] = useState("");
-  const [assessment, setAssessment] = useState("");
-  const [assignemnt, setAssignment] = useState("");
+  const [assignment, setAssignment] = useState("");
 
   const role = localStorage.getItem("role");
 
@@ -71,7 +69,7 @@ export default function CatalogPage() {
 
   const handleAddMaterial = async () => {
     try {
-      await addCourseModules(selectedCourseId, type, materialTitle, url);
+      await addCourseModules(selectedCourseId, type, materialTitle, url, assignment);
 
       enqueueSnackbar("Material added!", { variant: "success" });
       setShowMaterialModal(false);
@@ -108,6 +106,16 @@ export default function CatalogPage() {
       enqueueSnackbar("Error creating course", { variant: "error" });
     }
   };
+
+  //Delete Course 
+  const handleDeleteCourse = async (title) => {
+    try {
+      await deleteCourse(title);
+      enqueueSnackbar("Course deleted!", { variant: "success" });
+    } catch {
+      enqueueSnackbar("Error deleting course", { variant: "error" });
+    }
+  }
 
   return (
     <div className="flex flex-col p-6 space-y-4">
@@ -158,7 +166,7 @@ export default function CatalogPage() {
                       </button>
 
                       <button
-                        onClick={() => deleteCourse(c.title)}
+                        onClick={() => handleDeleteCourse(c.title)}
                         className="w-full px-3 py-2 text-left hover:bg-gray-200 text-red-600 flex gap-2"
                       >
                         <Trash2 size={16} /> Delete
@@ -227,21 +235,7 @@ export default function CatalogPage() {
               />
 
               <input
-                value={quiz}
-                onChange={(e) => setQuiZ(e.target.value)}
-                placeholder="Quiz ID (optional)"
-                className="border p-2 w-full rounded text-black"
-              />
-
-              <input
-                value={assessment}
-                onChange={(e) => setAssessment(e.target.value)}
-                placeholder="Assessment ID (optional)"
-                className="border p-2 w-full rounded text-black"
-              />
-
-              <input
-                value={assignemnt}
+                value={assignment}
                 onChange={(e) => setAssignment(e.target.value)}
                 placeholder="Assignment ID (optional)"
                 className="border p-2 w-full rounded text-black"
@@ -296,6 +290,10 @@ export default function CatalogPage() {
               </Grid>
 
               <Grid item xs={12} md={4}>
+                <TextField fullWidth label="Legacy" value={isLegacyProcess} onChange={(e) => setIsLegacyProcess(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
                 <TextField fullWidth label="Instructor" value={instructor} onChange={(e) => setInstructor(e.target.value)} />
               </Grid>
 
@@ -305,7 +303,7 @@ export default function CatalogPage() {
             </Grid>
 
             <div className="flex justify-end gap-3 mt-6">
-              <Button onClick={() => setShowCreateCourse(false)}>Cancel</Button>
+              <Button onClick={() => setShowCreateCourse(!showCreateCourse)}>Cancel</Button>
               <Button variant="contained" onClick={handleCreateCourse}>Create</Button>
             </div>
           </div>

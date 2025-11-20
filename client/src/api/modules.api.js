@@ -5,11 +5,12 @@ export async function getCoursesModules(courseId) {
     return data;
 }
 
-export async function addCourseModules(courseId, type, title, url){
+export async function addCourseModules(courseId, type, title, url, assignment){
     const {data} = await api.put(`/modules/${courseId}/add-material`, {
         type,
         title,
-        url
+        url,
+        assignment
     });
     return data;
 }
