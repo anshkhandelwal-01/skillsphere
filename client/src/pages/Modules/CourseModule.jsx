@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { getCoursesModules } from "../../api/modules.api";
 import { useSnackbar } from "notistack";
@@ -10,13 +10,16 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { Divider } from "@mui/material";
+import VideoPlayer from "./Video";
 
 export const CourseModule = () => {
+  const videoRef = useRef(null);
   const { enqueueSnackbar } = useSnackbar();
   const { courseId } = useParams();
   const [modules, setModules] = useState([]);
   const [showMaterials, setShowMaterials] = useState(null);
   const [hover, setHover] = useState(null);
+  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     const fetchModules = async () => {
@@ -83,10 +86,19 @@ export const CourseModule = () => {
                 <h3 className="font-semibold mb-3">What's Included</h3>
 
                 <div className="flex flex-col space-y-3">
-                  <div className="flex items-center gap-3">
+                  <div
+                    className="flex items-center gap-3"
+                    onClick={() => setShowVideo(!showVideo)}
+                  >
                     <TvMinimalPlay className="text-blue-700" />
-                    <p className="text-gray-700 font-medium">Video</p>
+                    <p className="text-gray-700 font-medium">Video Lecture</p>
                   </div>
+
+                  {showVideo && (
+                    <div className="flex flex-col gap-2">
+                      <VideoPlayer videoUrl={module.url} />
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-3">
                     <BookOpenText className="text-green-700" />

@@ -29,7 +29,7 @@ export default function CatalogPage() {
 
   const [type, setType] = useState("");
   const [materialTitle, setMaterialTitle] = useState("");
-  const [url, setUrl] = useState("");
+  const [file, setFile] = useState(null);
   const [assignment, setAssignment] = useState("");
 
   const role = localStorage.getItem("role");
@@ -67,16 +67,26 @@ export default function CatalogPage() {
     setOpenMenu(null); // close menu
   };
 
+  //Module form and video setup
+  const formData = new FormData();
+  formData.append("video", file);
+  formData.append("type", type);
+  formData.append("title", materialTitle);
+  formData.append("assignment", assignment);
+
   const handleAddMaterial = async () => {
     try {
-      await addCourseModules(selectedCourseId, type, materialTitle, url, assignment);
-
+      const data = await addCourseModules(
+        selectedCourseId,
+        formData // send formData directly
+      );
+      console.log(data);
       enqueueSnackbar("Material added!", { variant: "success" });
       setShowMaterialModal(false);
 
       setType("");
       setMaterialTitle("");
-      setUrl("");
+      setFile(null);
 
       navigate(`/modules/${selectedCourseId}`);
     } catch (err) {
@@ -107,7 +117,7 @@ export default function CatalogPage() {
     }
   };
 
-  //Delete Course 
+  //Delete Course
   const handleDeleteCourse = async (title) => {
     try {
       await deleteCourse(title);
@@ -115,7 +125,7 @@ export default function CatalogPage() {
     } catch {
       enqueueSnackbar("Error deleting course", { variant: "error" });
     }
-  }
+  };
 
   return (
     <div className="flex flex-col p-6 space-y-4">
@@ -123,8 +133,17 @@ export default function CatalogPage() {
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <TextField label="Search" value={query} onChange={(e) => setQuery(e.target.value)} />
-        <TextField select label="Level" value={level} onChange={(e) => setLevel(e.target.value)}>
+        <TextField
+          label="Search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <TextField
+          select
+          label="Level"
+          value={level}
+          onChange={(e) => setLevel(e.target.value)}
+        >
           {["", "Beginner", "Intermediate", "Advanced"].map((v) => (
             <MenuItem value={v} key={v}>
               {v || "Any"}
@@ -132,7 +151,12 @@ export default function CatalogPage() {
           ))}
         </TextField>
 
-        <TextField select label="Format" value={format} onChange={(e) => setFormat(e.target.value)}>
+        <TextField
+          select
+          label="Format"
+          value={format}
+          onChange={(e) => setFormat(e.target.value)}
+        >
           {["", "Video", "Interactive", "Text"].map((v) => (
             <MenuItem value={v} key={v}>
               {v || "Any"}
@@ -145,12 +169,13 @@ export default function CatalogPage() {
         {filtered.map((c, index) => (
           <Grid item xs={12} md={4} key={c._id}>
             <Paper className="p-4 space-y-3 relative">
-
               {/* Menu Button */}
               {(role === "ADMIN" || role === "LEAD") && (
                 <div>
                   <button
-                    onClick={() => setOpenMenu(openMenu === index ? null : index)}
+                    onClick={() =>
+                      setOpenMenu(openMenu === index ? null : index)
+                    }
                     className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-100"
                   >
                     <EllipsisVertical />
@@ -228,9 +253,9 @@ export default function CatalogPage() {
               />
 
               <input
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="Material URL (.mp4 supported)"
+                type="file"
+                onChange={(e) => setFile(e.target.files[0])}
+                placeholder="Video File (.mp4 supported)"
                 className="border p-2 w-full rounded text-black"
               />
 
@@ -242,7 +267,9 @@ export default function CatalogPage() {
               />
 
               <div className="flex justify-end gap-3">
-                <Button onClick={() => setShowMaterialModal(false)}>Cancel</Button>
+                <Button onClick={() => setShowMaterialModal(false)}>
+                  Cancel
+                </Button>
                 <Button onClick={handleAddMaterial} variant="contained">
                   Save
                 </Button>
@@ -262,49 +289,103 @@ export default function CatalogPage() {
 
             <Grid container spacing={2}>
               <Grid item xs={12} md={4}>
-                <TextField fullWidth label="Title" value={ctitle} onChange={(e) => setCTitle(e.target.value)} />
+                <TextField
+                  fullWidth
+                  label="Title"
+                  value={ctitle}
+                  onChange={(e) => setCTitle(e.target.value)}
+                />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <TextField fullWidth label="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+                <TextField
+                  fullWidth
+                  label="Description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <TextField fullWidth label="Category" value={category} onChange={(e) => setCategory(e.target.value)} />
+                <TextField
+                  fullWidth
+                  label="Category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <TextField fullWidth label="Role Target" value={roleTarget} onChange={(e) => setRoleTarget(e.target.value)} />
+                <TextField
+                  fullWidth
+                  label="Role Target"
+                  value={roleTarget}
+                  onChange={(e) => setRoleTarget(e.target.value)}
+                />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <TextField fullWidth label="Level" value={clevel} onChange={(e) => setCLevel(e.target.value)} />
+                <TextField
+                  fullWidth
+                  label="Level"
+                  value={clevel}
+                  onChange={(e) => setCLevel(e.target.value)}
+                />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <TextField fullWidth label="Duration" value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)} />
+                <TextField
+                  fullWidth
+                  label="Duration"
+                  value={durationMinutes}
+                  onChange={(e) => setDurationMinutes(e.target.value)}
+                />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <TextField fullWidth label="Format" value={cformat} onChange={(e) => setCFormat(e.target.value)} />
+                <TextField
+                  fullWidth
+                  label="Format"
+                  value={cformat}
+                  onChange={(e) => setCFormat(e.target.value)}
+                />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <TextField fullWidth label="Legacy" value={isLegacyProcess} onChange={(e) => setIsLegacyProcess(e.target.value)} />
+                <TextField
+                  fullWidth
+                  label="Legacy"
+                  value={isLegacyProcess}
+                  onChange={(e) => setIsLegacyProcess(e.target.value)}
+                />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <TextField fullWidth label="Instructor" value={instructor} onChange={(e) => setInstructor(e.target.value)} />
+                <TextField
+                  fullWidth
+                  label="Instructor"
+                  value={instructor}
+                  onChange={(e) => setInstructor(e.target.value)}
+                />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <TextField fullWidth label="Weightage" value={weightage} onChange={(e) => setWeightage(e.target.value)} />
+                <TextField
+                  fullWidth
+                  label="Weightage"
+                  value={weightage}
+                  onChange={(e) => setWeightage(e.target.value)}
+                />
               </Grid>
             </Grid>
 
             <div className="flex justify-end gap-3 mt-6">
-              <Button onClick={() => setShowCreateCourse(!showCreateCourse)}>Cancel</Button>
-              <Button variant="contained" onClick={handleCreateCourse}>Create</Button>
+              <Button onClick={() => setShowCreateCourse(!showCreateCourse)}>
+                Cancel
+              </Button>
+              <Button variant="contained" onClick={handleCreateCourse}>
+                Create
+              </Button>
             </div>
           </div>
         </div>
