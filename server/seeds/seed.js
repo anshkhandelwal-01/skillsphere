@@ -71,28 +71,6 @@ async function run() {
       },
     ],
   });
-
-  const module = await Module.create({
-    courseId: course._id,
-    title: "Introduction to ETL",
-    order: 1,
-    materials: [
-      {
-        type: "Video",
-        title: "ETL Overview",
-        url: "https://example.com/video1",
-        assignmentId: assignment._id,
-      },
-      {
-        type: "Video",
-        title: "Extraction in ETL",
-        url: "https://example.com/video2",
-        assignmentId: assignment._id,
-      },
-    ],
-  });
-
-  course.modules = [module._id];
   await course.save();
 
   console.log("Seed done");

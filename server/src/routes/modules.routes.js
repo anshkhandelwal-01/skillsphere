@@ -6,71 +6,120 @@ const cloudinary = require("../config/cloudinary");
 const multer = require("multer");
 
 const router = express.Router();
+
 const upload = multer({ dest: "uploads/" });
 
 router.get("/:courseId", requireAuth, async (req, res) => {
-  const { courseId } = req.params;
   try {
-    const modules = await Module.find({ courseId }).sort({ order: 1 });
-    const allMaterials = modules.flatMap((m) => m.materials);
-    res.json(allMaterials);
+    const moduleData = await Module.findOne({ courseId: req.params.courseId });
+    res.json(moduleData ? moduleData.materials : []);
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
   }
 });
 
-router.put("/:courseId/add-material", requireAuth, requireRole("ADMIN", "LEAD"), upload.single("video"), async (req, res) => {
-    const { courseId } = req.params;
-
+/* ----------------------------------------------------------
+   ADD Material (Video + PDF)
+----------------------------------------------------------- */
+router.put(
+  "/:courseId/add-material",
+  requireAuth,
+  requireRole("ADMIN", "LEAD"),
+  upload.fields([
+    { name: "video", maxCount: 1 },
+    { name: "reading", maxCount: 1 },
+  ]),
+  async (req, res) => {
     try {
-      // 1. Upload video to cloudinary
-      const cloudinaryResult = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "video",
-        folder: "courses/videos",
-      });
+      let videoUrl = null;
+      let readingUrl = null;
 
-      const videoUrl = cloudinaryResult.secure_url;
+      // ------------------ VIDEO UPLOAD ------------------
+      if (req.files?.video?.length > 0) {
+        console.log("Uploading video to Cloudinary...");
+        const cloudinaryResult = await cloudinary.uploader.upload(
+          req.files.video[0].path,
+          {
+            resource_type: "video",
+            folder: "courses/videos",
+          }
+        );
 
-      // 2. Extract other fields from body
-      const { type, title, assignmentId } = req.body;
+        videoUrl = cloudinaryResult.url;
+      }
+
+      // ------------------ PDF UPLOAD --------------------
+      if (req.files?.reading?.length > 0) {
+        console.log("Uploading reading to Cloudinary...");
+        const cloudinaryResult = await cloudinary.uploader.upload(
+          req.files.reading[0].path,
+          {
+            folder: "courses/readings",
+            use_filename: true,
+            unique_filename: false,
+          }
+        );
+        readingUrl = {
+          publicId: cloudinaryResult.public_id,
+          pageCount: cloudinaryResult.pages,
+          pdfUrl: cloudinaryResult.url,
+        };
+      }
+      // ------------------ SAVE MATERIAL ------------------
+      console.log("Saving material to database...");
+      const { title, assignmentId } = req.body;
 
       const newMaterial = {
-        type,
         title,
         url: videoUrl,
+        readingUrl,
         assignmentId,
       };
 
-      // 3. Find existing module
-      const existing = await Module.find({ courseId }).sort({ order: 1 });
+      let course = await Module.findOne({ courseId: req.params.courseId });
 
-      let result;
-
-      if (existing.length === 0) {
-        // If module doesn’t exist → create a new one
-        result = await Module.create({
-          courseId,
+      if (!course) {
+        course = await Module.create({
+          courseId: req.params.courseId,
           materials: [newMaterial],
         });
       } else {
-        // Module exists → push new material
-        result = await Module.findByIdAndUpdate(
-          existing[0]._id,
-          { $push: { materials: newMaterial } },
-          { new: true }
-        );
+        course.materials.push(newMaterial);
+        await course.save();
       }
 
-      // 4. FINAL SINGLE RESPONSE (IMPORTANT)
-      res.json({
+      return res.json({
         message: "Material added successfully",
-        material: result,
+        material: newMaterial,
       });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: error.message });
+    } catch (err) {
+      console.error("UPLOAD ERROR:", err);
+      return res.status(500).json({ message: err.message });
     }
   }
 );
+
+router.get("/:courseId/reading", requireAuth, async (req, res) => {
+  try {
+    const moduleData = await Module.findOne({ courseId: req.params.courseId });
+    const index = parseInt(req.query.index);
+    const material = moduleData.materials[index];
+    const { publicId, pageCount } = material.readingUrl;
+    const pages = [];
+    for (let i = 1; i <= pageCount; i++) {
+      const url = cloudinary.url(publicId, {
+        page: i,
+        format: "jpg",
+        secure: true,
+        resource_type: "image",
+        transformation: [{ width: 900,crop: "scale" }]
+      });
+      pages.push(url);
+    }
+    return res.json({ pages });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
+  }
+});
 
 module.exports = router;

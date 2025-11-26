@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { getCoursesModules } from "../../api/modules.api";
+import {
+  getCoursesModules,
+  getModuleReadingMaterial,
+} from "../../api/modules.api";
 import { useSnackbar } from "notistack";
 import {
   ChevronDown,
@@ -11,6 +14,7 @@ import {
 } from "lucide-react";
 import { Divider } from "@mui/material";
 import VideoPlayer from "./Video";
+import Reading from "./Reading";
 
 export const CourseModule = () => {
   const videoRef = useRef(null);
@@ -20,6 +24,8 @@ export const CourseModule = () => {
   const [showMaterials, setShowMaterials] = useState(null);
   const [hover, setHover] = useState(null);
   const [showVideo, setShowVideo] = useState(false);
+  const [reading, setReading] = useState(false);
+  const [readingData, setReadingData] = useState(null);
 
   useEffect(() => {
     const fetchModules = async () => {
@@ -39,6 +45,22 @@ export const CourseModule = () => {
 
   const toggleModule = (index) => {
     setShowMaterials(showMaterials === index ? null : index);
+  };
+
+  const handleReadingClick = async (index) => {
+    try {
+      setReading(!reading);
+      const data = await getModuleReadingMaterial(courseId, index);
+      setReadingData(data);
+    } catch (error) {
+      console.error("Error fetching reading material:", error);
+      enqueueSnackbar(
+        "Failed to load reading material. Please try again later.",
+        {
+          variant: "error",
+        }
+      );
+    }
   };
 
   return (
@@ -91,19 +113,32 @@ export const CourseModule = () => {
                     onClick={() => setShowVideo(!showVideo)}
                   >
                     <TvMinimalPlay className="text-blue-700" />
-                    <p className="text-gray-700 font-medium">Video Lecture</p>
+                    <p className="text-gray-700 font-medium hover:underline hover:underline-offset-4 cursor-pointer">
+                      Video Lecture
+                    </p>
                   </div>
 
                   {showVideo && (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 border border-gray-500 p-3 rounded-lg">
                       <VideoPlayer videoUrl={module.url} />
                     </div>
                   )}
 
-                  <div className="flex items-center gap-3">
+                  <div
+                    onClick={() => handleReadingClick(index)}
+                    className="flex items-center gap-3"
+                  >
                     <BookOpenText className="text-green-700" />
-                    <p className="text-gray-700 font-medium">Reading</p>
+                    <p className="text-gray-700 font-medium hover:underline hover:underline-offset-4 cursor-pointer">
+                      Reading
+                    </p>
                   </div>
+
+                  {reading && readingData?.pages && (
+                    <div className="flex flex-col gap-2 border border-gray-500 p-3 rounded-lg">
+                      <Reading readingData={readingData} />
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-3">
                     <ClipboardList className="text-purple-700" />
