@@ -6,6 +6,7 @@ const User = require("../src/models/User");
 const Course = require("../src/models/Course");
 const Module = require("../src/models/Module");
 const Assessment = require("../src/models/Assessment");
+const Notification = require("../src/models/Notification");
 
 async function run() {
   await mongoose.connect(process.env.MONGO_URI);
@@ -32,10 +33,18 @@ async function run() {
   });
 
   const user = await User.create({
-    email: "user@skillsphere.local",
+    email: "user1@skillsphere.local",
     passwordHash: bcrypt.hashSync("User@123", 10),
     role: "USER",
-    name: "Learner",
+    name: "Learner1",
+    leadId: lead._id,
+  });
+
+  const user2 = await User.create({
+    email: "user2@skillsphere.local",
+    passwordHash: bcrypt.hashSync("User@123", 10),
+    role: "USER",
+    name: "Learner2",
     leadId: lead._id,
   });
 
@@ -52,6 +61,33 @@ async function run() {
     isLegacyProcess: false,
     weightage: 1,
   });
+
+  const notification = await Notification.create(
+    {
+      toUserId: user._id,
+      type: "NewContent",
+      title: "New Course Available",
+      message: "A new course on ETL Basics is now available. Check it out!",
+      read: false,
+      meta: { courseId: course.title },
+    },
+    {
+      toUserId: user2._id,
+      type: "NewContent",
+      title: "New Course Available",
+      message: "A new course on ETL Basics is now available. Check it out!",
+      read: false,
+      meta: { courseId: course.title },
+    },
+    {
+      toUserId: lead._id,
+      type: "LeadNotified",
+      title: "Your Team Member Enrolled", 
+      message: "User1 has enrolled in the ETL Basics course.",
+      read: false,
+      meta: { courseId: course.title },
+    }
+  );
 
   const assignment = await Assessment.create({
     title: "ETL Final Assignment",

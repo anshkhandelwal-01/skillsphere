@@ -5,7 +5,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 export default function Topbar() {
 
   return (
-    <AppBar position="sticky" elevation={0} color="transparent">
+    <AppBar position="static" elevation={0} color="transparent">
       <Toolbar className="px-6">
         <Typography variant="h6" color="primary">
           SkillSphere
